@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Maps Type</title>
+    <style>body{padding:0;margin:0;background:#333;}h1{padding:0;margin:0;font-size:50%;color:white;}.mouse{font-size:50%;background: white;}</style>
+</head>
+<body>
+
+<h1>クイズ-ここはどこ？-</h1>
+
+<!-- MAP[START] -->
+<h1>Select Maps Type
+    <select id="type">
+        <option value="road" selected>road</option>
+        <option value="aerial">aerial</option>
+        <option value="canvasDark">canvasDark</option>
+        <option value="canvasLight">canvasLight</option>
+        <option value="birdseye">birdseye</option>
+        <option value="grayscale">grayscale</option>
+        <option value="streetside">streetside</option>
+    </select>
+</h1>
+<div id="myMap" style='position:relative;width:100%;height:450px;'></div>
+<!-- MAP[END] -->
+
+<button id="test">クリック</button>
+
+<ul>
+    <li><button id="answer_1" onclick="">AAA</button></li>
+    <li><button id="answer_2">BBB</button></li>
+    <li><button id="answer_3">CCC</button></li>
+</ul>
+
+<!-- jQueryのコードを先に読み込む -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- [ MapTypeId ] https://msdn.microsoft.com/en-us/library/mt712700.aspx -->
+<script src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=[***Your Map KEY***]' async defer></script>
+<script>
+    
+    let map, typeid;
+
+    var latitude=44;
+    var longitude=60;
+
+    
+
+    // function lati_long(){
+    //     latitude = Math.floor( Math.random() * 181) - 90;
+    //     longitude=Math.floor( Math.random() * 360) - 180;
+    //     return{
+    //         latitude,
+    //         longitude
+    //     }
+    // }
+
+    var countryName;
+
+    var Countries = ["China","Japan","Korea","America","Algeria","Egypt","Vietnam","India","Indonesia","Brazil","Canada","Mexico","South Africa","Ethiopia","Myanmar","Iran","France","Germany","Spain","Australia","Chili"];
+
+    function GetMap() {
+        // latitude = Math.floor( Math.random() * 181) - 90;
+        // longitude=Math.floor( Math.random() * 360) - 180;
+        const latitude = parseFloat((Math.random() * 181 - 90).toFixed(8));
+        const longitude = parseFloat((Math.random() * 360 - 180).toFixed(8));
+        map = new Microsoft.Maps.Map('#myMap', {
+            center: new Microsoft.Maps.Location(latitude, longitude), //location set
+            mapTypeId: Microsoft.Maps.MapTypeId.aerial, //aerial,canvasDark,canvasLight,birdseye,grayscale,load,streetside
+            zoom: 12 //ZoomIn=20~Zoomout=1
+        });
+    
+        console.log(latitude,"これに値入ってる？")
+        console.log(longitude,"これに値入ってる？")
+
+    const geocodeEndpoint = `https://dev.virtualearth.net/REST/v1/Locations/${latitude},${longitude}?key=AsRn_ajYd5J86BZNLoK0_AHdqNMOhdGlsaILAwdOGjbyRdw9U5eurGPm68HEiMIj`;
+
+    // ジオコーディング サービス【始まり】
+    fetch(geocodeEndpoint)
+      .then(response => response.json())
+      .then(data => {
+        // 応答から国の名前を取得
+        countryName = data.resourceSets[0]?.resources[0]?.address?.countryRegion;
+        console.log('Country: ' + countryName);
+    })
+    //ジオコーディング サービス【終わり】
+    }
+
+
+// const geocodeEndpoint = `https://dev.virtualearth.net/REST/v1/Locations/${latitude},${longitude}?key=AsRn_ajYd5J86BZNLoK0_AHdqNMOhdGlsaILAwdOGjbyRdw9U5eurGPm68HEiMIj`;
+
+// // ジオコーディング サービス【始まり】
+// fetch(geocodeEndpoint)
+//     .then(response => response.json())
+//     .then(data => {
+//         // 応答から国の名前を取得
+//         countryName = data.resourceSets[0]?.resources[0]?.address?.countryRegion;
+//         console.log('Country: ' + countryName);
+//     })
+// //ジオコーディング サービス【終わり】
+
+var conutry_A;
+var conutry_B;
+var conutry_C;
+var Re_arrage = [conutry_A,conutry_B,conutry_C,];
+
+// 各ボタンにランダムに国を表示させる
+function Unokikun(){
+    // ここで国をA,B,Cに入れる
+    conutry_A = Countries[Math.floor( Math.random() * 21 )];
+    conutry_B = Countries[Math.floor( Math.random() * 21 )];
+    conutry_C = countryName;
+    // Re_arrangeに国をそれぞれ再度入れる。
+    Re_arrage = [conutry_A,conutry_B,conutry_C,]
+    // 国の順番の配列をばらばらにしたい！
+
+    function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+     }
+    }
+
+    const randomArray = [0, 1, 2];
+    shuffleArray(randomArray);
+    console.log(randomArray);
+
+    var newArray = [Re_arrage[randomArray[0]],Re_arrage[randomArray[1]],Re_arrage[randomArray[2]]]
+    console.log(newArray);
+
+    $("#answer_1").text(newArray[0]);
+    $("#answer_2").text(newArray[1]);
+    $("#answer_3").text(newArray[2]);
+}
+
+// Unokikun関数の実施
+$("#test").on("click",function(){
+    Unokikun();
+});
+
+
+
+
+$("#answer_1").on("click",function(){
+    var test = document.getElementById("answer_1");
+    if(test.textContent==conutry_C){
+        console.log(test.textContent)
+        alert("正解");
+    }else{
+        console.log("はずれ");
+        alert("はずれ");
+    }
+})
+
+$("#answer_2").on("click",function(){
+    var test = document.getElementById("answer_2");
+    if(test.textContent==conutry_C){
+        console.log(test.textContent)
+        alert("正解");
+    }else{
+        console.log("はずれ");
+        alert("はずれ");
+    }
+})
+
+$("#answer_3").on("click",function(){
+    var test = document.getElementById("answer_3");
+    if(test.textContent==conutry_C){
+        console.log(test.textContent,"正解です")
+        alert("正解");
+    }else{
+        console.log("はずれ");
+        alert("はずれ");
+    }
+})
+
+
+    //***********************************************************************************
+    //Select MapTypeID
+    //***********************************************************************************
+    document.getElementById("type").onchange = function(){
+        typeid = this.value; //selectboxの値を取得
+        if(typeid == "load") type = {mapTypeId: Microsoft.Maps.MapTypeId.load};
+        if(typeid == "aerial") type = {mapTypeId: Microsoft.Maps.MapTypeId.aerial};
+        if(typeid == "canvasDark") type = {mapTypeId: Microsoft.Maps.MapTypeId.canvasDark};
+        if(typeid == "canvasLight") type = {mapTypeId: Microsoft.Maps.MapTypeId.canvasLight};
+        if(typeid == "birdseye") type = {mapTypeId: Microsoft.Maps.MapTypeId.birdseye};
+        if(typeid == "grayscale") type = {mapTypeId: Microsoft.Maps.MapTypeId.grayscale};
+        if(typeid == "streetside") type = {mapTypeId: Microsoft.Maps.MapTypeId.streetside};
+        //add type
+        map.setView(type);
+    }
+
+
+
+</script>
+</body>
+</html>
